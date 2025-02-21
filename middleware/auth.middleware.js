@@ -1,4 +1,5 @@
-const { sendError, STATUS_CODES } = require('../utils/response.handler');
+const { ResponseHandler, STATUS_CODES } = require('../utils/response.handler');
+const { sendError } = ResponseHandler;
 const TokenService = require('../utils/token.utils');
 const User = require('../models/user.model');
 const { MESSAGES } = require('../config/constants');

@@ -33,7 +33,13 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  otp: {
+    code: String,
+    expiry: Date
+  },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date
 });
 
 // Method to compare password
