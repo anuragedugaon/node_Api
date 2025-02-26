@@ -41,7 +41,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/posts', postRoutes);
 app.use('/users', userRoutes);
-app.use('/comments', commentRoutes);
 app.use('/chats', chatRoutes);
 
 // Error handling middleware
