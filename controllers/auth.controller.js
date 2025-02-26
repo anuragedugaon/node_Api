@@ -82,10 +82,7 @@ class AuthController {
       if (existingUser) {
         return sendError(res, {
           statusCode: STATUS_CODES.CONFLICT.code,
-          message: 'Email already registered',
-          errors: {
-            code: ERROR_CODES.USER.ALREADY_EXISTS
-          }
+          message: 'Email already registered'
         });
       }
 
@@ -101,26 +98,21 @@ class AuthController {
 
       await user.save();
 
-      // Generate token
-      const token = TokenService.generateToken(user._id);
-
       return sendSuccess(res, {
         statusCode: STATUS_CODES.CREATED.code,
-        message: MESSAGES.USER.CREATED,
+        message: 'Registration successful',
         data: {
           user: {
-            id: user._id,
+            _id: user._id,
             name: user.name,
             email: user.email
-          },
-          token
+          }
         }
       });
     } catch (error) {
       return sendError(res, {
         message: 'Registration failed',
         errors: {
-          code: ERROR_CODES.USER.INVALID_DATA,
           description: error.message
         }
       });
@@ -129,31 +121,17 @@ class AuthController {
 
   static async getProfile(req, res) {
     try {
-      const user = await User.findById(req.user._id).select('-password -devices');
-      
-      if (!user) {
-        return sendError(res, {
-          statusCode: STATUS_CODES.NOT_FOUND.code,
-          message: MESSAGES.USER.NOT_FOUND
-        });
-      }
+      const user = await User.findById(req.user._id)
+        .select('-password -devices');
 
       return sendSuccess(res, {
         message: 'Profile fetched successfully',
-        data: {
-          user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            createdAt: user.createdAt
-          }
-        }
+        data: { user }
       });
     } catch (error) {
       return sendError(res, {
         message: 'Failed to fetch profile',
         errors: {
-          code: ERROR_CODES.USER.NOT_FOUND,
           description: error.message
         }
       });
@@ -162,75 +140,30 @@ class AuthController {
 
   static async updateProfile(req, res) {
     try {
-      const { name, email, currentPassword, newPassword } = req.body;
+      const { name, email } = req.body;
       const user = await User.findById(req.user._id);
 
-      if (!user) {
-        return sendError(res, {
-          statusCode: STATUS_CODES.NOT_FOUND.code,
-          message: MESSAGES.USER.NOT_FOUND
-        });
-      }
-
-      // If email is being updated, check if new email already exists
       if (email && email !== user.email) {
-        const emailExists = await User.findOne({ email });
-        if (emailExists) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
           return sendError(res, {
             statusCode: STATUS_CODES.CONFLICT.code,
-            message: 'Email already in use',
-            errors: {
-              code: ERROR_CODES.USER.ALREADY_EXISTS
-            }
+            message: 'Email already in use'
           });
         }
         user.email = email;
       }
 
-      // Update name if provided
-      if (name) {
-        user.name = name;
-      }
-
-      // Handle password update if provided
-      if (currentPassword && newPassword) {
-        // Verify current password
-        const isPasswordValid = await user.comparePassword(currentPassword);
-        if (!isPasswordValid) {
-          return sendError(res, {
-            statusCode: STATUS_CODES.UNAUTHORIZED.code,
-            message: 'Current password is incorrect',
-            errors: {
-              code: ERROR_CODES.AUTH.INVALID_CREDENTIALS
-            }
-          });
-        }
-
-        // Validate new password length
-        if (newPassword.length < SCHEMA_CONSTANTS.USER.MIN_PASSWORD_LENGTH) {
-          return sendError(res, {
-            statusCode: STATUS_CODES.BAD_REQUEST.code,
-            message: `Password must be at least ${SCHEMA_CONSTANTS.USER.MIN_PASSWORD_LENGTH} characters long`,
-            errors: {
-              code: ERROR_CODES.USER.INVALID_DATA
-            }
-          });
-        }
-
-        // Hash and set new password
-        user.password = await bcrypt.hash(newPassword, 10);
-      }
-
+      if (name) user.name = name;
       await user.save();
 
       return sendSuccess(res, {
-        message: MESSAGES.USER.UPDATED,
+        message: 'Profile updated successfully',
         data: {
           user: {
-            id: user._id,
+            _id: user._id,
             name: user.name,
-            email: user.email,
-            updatedAt: new Date()
+            email: user.email
           }
         }
       });
@@ -238,7 +171,6 @@ class AuthController {
       return sendError(res, {
         message: 'Failed to update profile',
         errors: {
-          code: ERROR_CODES.USER.INVALID_DATA,
           description: error.message
         }
       });
@@ -437,8 +369,32 @@ class AuthController {
     }
   }
   
+  static async logout(req, res) {
+    try {
+      const { deviceId } = req.body;
+      
+      // Remove device token
+      await User.updateOne(
+        { _id: req.user._id },
+        {
+          $pull: {
+            devices: { deviceId }
+          }
+        }
+      );
 
-
+      return sendSuccess(res, {
+        message: 'Logged out successfully'
+      });
+    } catch (error) {
+      return sendError(res, {
+        message: 'Logout failed',
+        errors: {
+          description: error.message
+        }
+      });
+    }
+  }
 }
 
 module.exports = AuthController; 

@@ -1,13 +1,13 @@
 // Application Configuration
 const APP_CONFIG = {
-  PORT: process.env.PORT || 3000,
+  PORT: process.env.PORT || 3001,
   JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
   MAX_DEVICES: 5
 };
 
 const STATUS_CODES = {
   OK: { code: 200, message: 'Success' },
-  CREATED: { code: 201, message: 'Created Successfully' },
+  CREATED: { code: 200, message: 'Created Successfully' },
   BAD_REQUEST: { code: 400, message: 'Bad Request' },
   UNAUTHORIZED: { code: 401, message: 'Unauthorized' },
   FORBIDDEN: { code: 403, message: 'Forbidden' },
