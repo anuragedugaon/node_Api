@@ -46,14 +46,13 @@ class AuthController {
       await user.save();
 
       return sendSuccess(res, {
-        message: MESSAGES.AUTH.LOGIN_SUCCESS,
         data: { 
-          token, 
-          user: {
+             token, 
+            message: MESSAGES.AUTH.LOGIN_SUCCESS,
             id: user._id,
             name: user.name,
             email: user.email
-          }
+          
         }
       });
     } catch (error) {
@@ -108,11 +107,11 @@ class AuthController {
         statusCode: STATUS_CODES.CREATED.code,
         message: 'Registration successful',
         data: {
-          user: {
+          
             _id: user._id,
             name: user.name,
-            email: user.email
-          },
+            email: user.email,
+          
           token
         }
       });
