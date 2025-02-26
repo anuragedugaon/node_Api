@@ -1,20 +1,31 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth.middleware');
 const PostController = require('../controllers/post.controller');
-const ShareController = require('../controllers/share.controller');
-const InteractionController = require('../controllers/interaction.controller');
+const authMiddleware = require('../middleware/auth.middleware');
+const upload = require('../utils/file.utils');
 
-// Post CRUD routes
-router.post('/', authMiddleware, PostController.create);
-router.get('/:postId', PostController.getById);
-router.put('/:postId', authMiddleware, PostController.update);
-router.delete('/:postId', authMiddleware, PostController.delete);
+// Post CRUD with image upload
+router.post('/', 
+  authMiddleware, 
+  upload.single('image'), 
+  PostController.createPost
+);
 
-// Interaction routes
-router.post('/:postId/like', authMiddleware, PostController.toggleLike);
-router.post('/:postId/share', authMiddleware, ShareController.sharePost);
-router.get('/:postId/likes', authMiddleware, InteractionController.getLikes);
-router.get('/:postId/shares', authMiddleware, InteractionController.getShares);
+router.get('/', authMiddleware, PostController.getAllPosts);
+router.get('/:postId', authMiddleware, PostController.getPostById);
+router.put('/:postId', 
+  authMiddleware, 
+  upload.single('image'),
+  PostController.updatePost
+);
+router.delete('/:postId', authMiddleware, PostController.deletePost);
+
+// Post interactions
+router.post('/:postId/like', authMiddleware, PostController.likePost);
+router.post('/:postId/share', authMiddleware, PostController.sharePost);
+
+// Comments
+// router.post('/:postId/comments', authMiddleware, PostController.addComment);
+// router.get('/:postId/comments', authMiddleware, PostController.getComments);
 
 module.exports = router; 

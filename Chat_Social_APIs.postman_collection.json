@@ -1,0 +1,331 @@
+{
+  "info": {
+    "name": "Chat & Social Media APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth APIs",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/register",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "name": "John Doe",
+                "email": "john@example.com",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "email": "john@example.com",
+                "password": "password123",
+                "deviceInfo": {
+                  "deviceId": "device123",
+                  "deviceName": "iPhone 12"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/forgot-password",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "email": "john@example.com"
+              }
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/verify-otp",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "email": "john@example.com",
+                "otp": "123456"
+              }
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "token": "reset_token",
+                "newPassword": "newpassword123"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User APIs",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/profile",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/profile",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "name": "Updated Name",
+                "email": "newemail@example.com"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Chat APIs",
+      "item": [
+        {
+          "name": "Start Individual Chat",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chats",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "userId": "target_user_id",
+                "type": "individual"
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Group Chat",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chats",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "type": "group",
+                "groupName": "My Group",
+                "participants": ["user_id1", "user_id2"]
+              }
+            }
+          }
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chats/{{chatId}}/messages",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "content": "Hello!",
+                "replyTo": "message_id_optional"
+              }
+            }
+          }
+        },
+        {
+          "name": "Send Image",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chats/{{chatId}}/files/image",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/path/to/image.jpg"
+                },
+                {
+                  "key": "content",
+                  "value": "Check this image!"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Recent Messages",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/chats/{{chatId}}/messages/recent",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "query": [
+              {
+                "key": "limit",
+                "value": "20"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Post APIs",
+      "item": [
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/posts",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Post Title"
+                },
+                {
+                  "key": "description",
+                  "value": "Post content"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/path/to/image.jpg"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Posts",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/posts",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "query": [
+              {
+                "key": "page",
+                "value": "1"
+              },
+              {
+                "key": "limit",
+                "value": "10"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Like Post",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/posts/{{postId}}/like",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here"
+    }
+  ]
+} 

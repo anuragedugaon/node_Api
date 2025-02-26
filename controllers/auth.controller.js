@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const { APP_CONFIG, MESSAGES, ERROR_CODES, SCHEMA_CONSTANTS } = require('../config/constants');
 const { ResponseHandler, STATUS_CODES } = require('../utils/response.handler');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const TokenService = require('../utils/token.utils');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -78,25 +78,31 @@ class AuthController {
       const { name, email, password } = req.body;
 
       // Check if user exists
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
+      const userExists = await User.findOne({ email });
+      if (userExists) {
         return sendError(res, {
-          statusCode: STATUS_CODES.CONFLICT.code,
+          statusCode: STATUS_CODES.BAD_REQUEST.code,
           message: 'Email already registered'
         });
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
       // Create user
-      const user = new User({
+      const user = await User.create({
         name,
         email,
         password: hashedPassword
       });
 
-      await user.save();
+      // Generate token
+      const token = jwt.sign(
+        { userId: user._id },
+        APP_CONFIG.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       return sendSuccess(res, {
         statusCode: STATUS_CODES.CREATED.code,
@@ -106,24 +112,22 @@ class AuthController {
             _id: user._id,
             name: user.name,
             email: user.email
-          }
+          },
+          token
         }
       });
     } catch (error) {
       return sendError(res, {
         message: 'Registration failed',
-        errors: {
-          description: error.message
-        }
+        errors: { description: error.message }
       });
     }
   }
 
   static async getProfile(req, res) {
     try {
-      const user = await User.findById(req.user._id)
-        .select('-password -devices');
-
+      const user = await User.findById(req.user._id).select('-password');
+      
       return sendSuccess(res, {
         message: 'Profile fetched successfully',
         data: { user }
@@ -131,48 +135,29 @@ class AuthController {
     } catch (error) {
       return sendError(res, {
         message: 'Failed to fetch profile',
-        errors: {
-          description: error.message
-        }
+        errors: { description: error.message }
       });
     }
   }
 
   static async updateProfile(req, res) {
     try {
-      const { name, email } = req.body;
-      const user = await User.findById(req.user._id);
-
-      if (email && email !== user.email) {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-          return sendError(res, {
-            statusCode: STATUS_CODES.CONFLICT.code,
-            message: 'Email already in use'
-          });
-        }
-        user.email = email;
-      }
-
-      if (name) user.name = name;
-      await user.save();
+      const { name } = req.body;
+      
+      const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { name },
+        { new: true }
+      ).select('-password');
 
       return sendSuccess(res, {
         message: 'Profile updated successfully',
-        data: {
-          user: {
-            _id: user._id,
-            name: user.name,
-            email: user.email
-          }
-        }
+        data: { user }
       });
     } catch (error) {
       return sendError(res, {
         message: 'Failed to update profile',
-        errors: {
-          description: error.message
-        }
+        errors: { description: error.message }
       });
     }
   }

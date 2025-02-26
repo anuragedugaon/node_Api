@@ -1,18 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth.middleware');
 const AuthController = require('../controllers/auth.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
 // Auth routes
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
+router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/verify-otp', AuthController.verifyOTP);
+router.post('/reset-password', AuthController.resetPassword);
+router.post('/logout', authMiddleware, AuthController.logout);
 
-// Password reset flow
-router.post('/forgot-password', AuthController.forgotPassword); // Step 1: Request OTP
-router.post('/verify-otp', AuthController.verifyOTP); // Step 2: Verify OTP
-router.post('/reset-password', AuthController.resetPassword); // Step 3: Reset password
-
-// User routes
+// Profile routes
 router.get('/profile', authMiddleware, AuthController.getProfile);
 router.put('/profile', authMiddleware, AuthController.updateProfile);
 

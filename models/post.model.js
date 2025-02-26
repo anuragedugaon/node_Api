@@ -42,6 +42,14 @@ const postSchema = new mongoose.Schema({
     },
     createdAt: { type: Date, default: Date.now }
   }],
+  comments: [{
+    content: String,
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    createdAt: Date
+  }],
   likesCount: { type: Number, default: 0 },
   sharesCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }

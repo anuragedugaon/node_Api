@@ -59,10 +59,36 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Handle server errors
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.log('Port is already in use, trying another port...');
+    setTimeout(() => {
+      server.close();
+      server.listen(port + 1);
+    }, 1000);
+  } else {
+    console.error('Server error:', error);
+  }
+});
+
 // Start server
 const port = process.env.PORT || 3001;
 server.listen(port, () => {  
   console.log(`Server is running on http://localhost:${port}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.info('SIGTERM signal received.');
+  console.log('Closing http server.');
+  server.close(() => {
+    console.log('Http server closed.');
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed.');
+      process.exit(0);
+    });
+  });
 });
 
 // Handle unhandled promise rejections
